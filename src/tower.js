@@ -7,6 +7,7 @@ function Tower(disks) {
     // The disk of the biggest size is located at index 0
     this.disks = disks;
     this.rods = new Array();
+    this.moves = 0;
 
     for(let i=0;i<3;i++) {
         this.rods.push(new Array());
@@ -31,7 +32,8 @@ function Tower(disks) {
             let block = fromRod[fromRod.length - 1];
             fromRod.splice(fromRod.length - 1, 1);
             toRod.push(block);
-
+            this.moves++;
+            
             return true;
         }
 

@@ -1,18 +1,38 @@
 let tower;
+let storage;
 let selected;
+
+let saveBtn;
 
 const diskHeight = 20;
 const maxDiskSpan = 0.5; // Maximum percentage of the window portion for a given rod that a disk can take 
 
+const endDate = new Date("Aug 3, 2019 23:59:59");
+
 function setup() {
     createCanvas(windowWidth, windowHeight);
     background(30);
+    
+    saveBtn = createButton('Save');
+    saveBtn.position(20, 20);
+    saveBtn.mousePressed(() => storage.save(tower));
 
-    tower = new Tower(20);
+    storage = new Storage();
+    tower = storage.get() || new Tower(20);
+
     selected = null;
 }
 
 function draw() {
+
+    if(endDate.getTime() - new Date().getTime() <= 0) {
+        background(209, 81, 59);
+        textSize(width/10);
+        textAlign(CENTER);
+        text('CALL ME DADDY!', width/2, height/2);
+
+        return;
+    }
     
     // Flip the coordinate system
     scale(1, -1);
@@ -23,22 +43,11 @@ function draw() {
     background(30);
     drawGrid();
     drawTower();
+    drawMoves();
+    drawCountdown();
 
     if(selected != null) {
-        scale(1, -1);
-        translate(0, -height);
-        let rod = tower.rods[selected];
-        if(rod.length != 0) {
-            const size = rod[rod.length - 1].size;
-            console.log(size);
-            //console.log(size);
-            const width = getWidth(size);
-            // console.log(width);
-
-            rectMode(CORNER);
-            rect(mouseX, mouseY, width, diskHeight);
-            rectMode(CENTER);
-        }
+        moveSelected();
     }
 }
 
@@ -82,6 +91,48 @@ function drawRod(index, rod) {
     }
 
     //if(index != 2)rect(mid-10, 20, mid+10, 40);
+}
+
+function moveSelected() {
+    let rod = tower.rods[selected];
+    if(rod.length != 0) {
+        const size = rod[rod.length - 1].size;
+        //console.log(size);
+        const width = getWidth(size);
+        // console.log(width);
+
+        rectMode(CORNER);
+        rect(mouseX, mouseY, width, diskHeight);
+        rectMode(CENTER);
+    }
+}
+
+function drawMoves() {
+    scale(1, -1);
+    translate(0, -height);
+
+    const score = `Moves: ${tower.moves}`;
+    const x = windowWidth/2;
+    const y = 30;
+
+    fill(117, 122, 130);
+    textSize(width/75);
+    textAlign(CENTER);
+    text(score, x, y);
+}
+
+function drawCountdown() {
+    const diff = endDate.getTime() - new Date().getTime(); 
+
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    const countdown = `${days} days ${hours} hours ${minutes} minutes left`;
+    const x = windowWidth * 5/6;
+    const y = 30;
+
+    text(countdown, x, y);
 }
 
 function getWidth(size) {
